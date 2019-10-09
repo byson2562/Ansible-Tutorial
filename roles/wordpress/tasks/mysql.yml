@@ -1,0 +1,33 @@
+---
+- name: remove mariadb-libs
+  yum:
+    state: absent
+    name: mariadb-libs
+
+- name: install mysql repository
+  yum:
+    name: http://dev.mysql.com/get/mysql57-community-release-el6-7.noarch.rpm
+    state: installed
+    validate_certs: yes
+  tags: mysqld
+
+- name: install mysql
+  yum:
+    state: installed
+    name: "{{ item }}"
+  with_items:
+    # - mysql-community-devel
+    - mysql-community-server
+    # - MySQL-python
+
+- name: Create database
+  mysql_db: db={{dbname}} state=present encoding=utf8
+  tags: mysqld
+
+- name: Create database user
+  mysql_user: >
+    name={{dbuser}}
+    password="{{dbpassword}}"
+    priv={{dbname}}.*:ALL
+    state=present
+  tags: mysqld
